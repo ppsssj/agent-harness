@@ -17,7 +17,7 @@ function Test-ManagedTarget {
     if (-not (Get-AgentHarnessCanonicalPath $Record.destinationRoot).Equals((Get-AgentHarnessCanonicalPath $Root), [System.StringComparison]::OrdinalIgnoreCase)) { return 'BROKEN: state destination differs from resolved root.' }
     if (-not (Test-Path -LiteralPath $Root -PathType Container) -or (Test-AgentHarnessReparsePoint $Root)) { return 'BROKEN: target root is missing or a reparse point.' }
     $expectedNames = @(Get-AgentHarnessExpectedSkills | ForEach-Object { Get-AgentHarnessPackageName $_ })
-    if (@($Record.packages).Count -ne $expectedNames.Count) { return 'DEGRADED: state does not contain eight packages.' }
+    if (@($Record.packages).Count -ne $expectedNames.Count) { return "DEGRADED: state does not contain the expected $($expectedNames.Count) packages." }
     foreach ($name in $expectedNames) {
         $records = @($Record.packages | Where-Object { $_.name -eq $name })
         if ($records.Count -ne 1) { return "DEGRADED: package state missing or duplicated for $name." }

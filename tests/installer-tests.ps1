@@ -11,6 +11,7 @@ $uninstaller = Join-Path $repository 'scripts/uninstall.ps1'
 $doctor = Join-Path $repository 'scripts/doctor.ps1'
 Import-Module $module -Force
 
+$expectedPackageCount = @(Get-AgentHarnessExpectedSkills).Count
 $passed = 0
 $notAvailable = @()
 function Assert-Test {
@@ -56,7 +57,9 @@ try {
     $secondPackages = Join-Path $root 'packages-two'
     New-AgentHarnessPackages -SourceRoot $source -OutputRoot $firstPackages | Out-Null
     New-AgentHarnessPackages -SourceRoot $source -OutputRoot $secondPackages | Out-Null
-    Assert-Test ((Get-ChildItem -LiteralPath $firstPackages -Directory).Count -eq 8) 'deterministic packaging creates all eight packages'
+    Assert-Test ($expectedPackageCount -eq 9 -and 'visual-critique' -in (Get-AgentHarnessExpectedSkills)) 'expected skills include visual-critique as the ninth skill'
+    Assert-Test ((Get-ChildItem -LiteralPath $firstPackages -Directory).Count -eq $expectedPackageCount) 'deterministic packaging creates every expected package'
+    Assert-Test (Test-Path -LiteralPath (Join-Path $firstPackages 'agent-harness-visual-critique/SKILL.md') -PathType Leaf) 'visual-critique package is generated'
     Assert-Test (@(Compare-Object (Get-AgentHarnessFileInventory $firstPackages | ForEach-Object { "$($_.path):$($_.sha256)" }) (Get-AgentHarnessFileInventory $secondPackages | ForEach-Object { "$($_.path):$($_.sha256)" })).Count -eq 0) 'deterministic packaging has identical hashes'
     foreach ($lineEnding in @('LF', 'CRLF')) {
         $endingSource = New-FixtureSource -Root (Join-Path $root "frontmatter $lineEnding")
@@ -75,17 +78,45 @@ try {
         Assert-Test ($frontmatter -match "(?m)^name: $name\r?$") "namespaced frontmatter $name"
         Assert-Test ($frontmatter -notmatch '\]\([^)]*SKILL\.md') "no sibling SKILL.md dependency $name"
     }
+    $critiquePackage = Join-Path $firstPackages 'agent-harness-visual-critique'
+    foreach ($dependency in @('templates/visual-critique-report.md', 'templates/reference-lock.md', 'templates/DESIGN.md')) {
+        Assert-Test (Test-Path -LiteralPath (Join-Path $critiquePackage $dependency) -PathType Leaf) "visual-critique package-local dependency $dependency"
+    }
+    foreach ($pair in @(@('design-research', 'visual-critique'), @('frontend-design', 'visual-critique'), @('verification', 'visual-critique'), @('visual-critique', 'frontend-design'), @('visual-critique', 'design-research'), @('visual-critique', 'verification'))) {
+        $manifestText = Get-Content -LiteralPath (Join-Path $firstPackages "agent-harness-$($pair[0])/SKILL.md") -Raw
+        $related = [regex]::Match($manifestText, '(?ms)^## Related\s*\r?\n(.*?)(?=^## |\z)').Groups[1].Value
+        Assert-Test ($related -match "\bagent-harness-$($pair[1])\b") "agent-harness-$($pair[0]) relates to agent-harness-$($pair[1])"
+    }
+    $unknownRelated = Join-Path $root 'unknown related package'
+    Copy-Item -LiteralPath $critiquePackage -Destination $unknownRelated -Recurse
+    Add-Content -LiteralPath (Join-Path $unknownRelated 'SKILL.md') -Value 'agent-harness-visual-critic'
+    $unknownRelatedError = $null
+    try { Test-AgentHarnessPackageRoot $unknownRelated | Out-Null } catch { $unknownRelatedError = $_.Exception.Message }
+    Assert-Test ($unknownRelatedError -match "Unknown related skill identifier 'agent-harness-visual-critic'") 'related skill validation still rejects unknown identifiers'
 
     $preview = & $installer -Target Codex -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
     Assert-Test ($preview.results[0].status -eq 'PREVIEW' -and -not (Test-Path -LiteralPath $overrides.Codex) -and -not (Test-Path -LiteralPath $state)) 'dry-run performs no host or state writes'
 
     $installCodex = & $installer -Target Codex -Apply -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
     Assert-Test ($installCodex.results[0].status -eq 'INSTALLED') 'clean first Codex install'
-    Assert-Test ((Get-ChildItem -LiteralPath $overrides.Codex -Directory | Where-Object { $_.Name -like 'agent-harness-*' }).Count -eq 8) 'Codex has eight installed packages'
+    Assert-Test ((Get-ChildItem -LiteralPath $overrides.Codex -Directory | Where-Object { $_.Name -like 'agent-harness-*' }).Count -eq $expectedPackageCount) 'Codex has every expected installed package'
+    Assert-Test (@((Read-AgentHarnessState -StatePath $state).managedTargets[0].packages).Count -eq $expectedPackageCount) 'Codex state records every expected package'
     $repeat = & $installer -Target Codex -Apply -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
     Assert-Test ($repeat.results[0].status -eq 'UNCHANGED') 'repeat install is idempotent'
     $doctorCodex = & $doctor -Target Codex -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
     Assert-Test ($doctorCodex.result -eq 'HEALTHY' -and $doctorCodex.targets[0].status -eq 'MANAGED_HEALTHY' -and $doctorCodex.targets[1].status -eq 'UNSELECTED') 'Codex-only doctor remains healthy with Claude unselected'
+
+    # Simulate an install made before visual-critique existed: owned state and files for the prior eight packages only.
+    $legacyName = Get-AgentHarnessPackageName 'visual-critique'
+    $legacyState = Read-AgentHarnessState -StatePath $state
+    $legacyState.managedTargets[0].packages = @($legacyState.managedTargets[0].packages | Where-Object { $_.name -ne $legacyName })
+    Write-AgentHarnessState -State $legacyState -StatePath $state
+    Remove-Item -LiteralPath (Join-Path $overrides.Codex $legacyName) -Recurse -Force
+    $legacyDoctor = & $doctor -Target Codex -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
+    Assert-Test ($legacyDoctor.result -eq 'DEGRADED' -and $legacyDoctor.targets[0].detail -eq "DEGRADED: state does not contain the expected $expectedPackageCount packages.") 'doctor reports the expected package count for a prior eight-package install'
+    $upgrade = & $installer -Target Codex -Apply -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
+    $upgradeDoctor = & $doctor -Target Codex -SourceRoot $source -StatePath $state -TargetRootOverrides $overrides
+    Assert-Test ($upgrade.results[0].status -eq 'INSTALLED' -and (Test-Path -LiteralPath (Join-Path $overrides.Codex $legacyName)) -and $upgradeDoctor.result -eq 'HEALTHY') 'owned eight-package install upgrades to include visual-critique'
 
     $foreignName = Get-AgentHarnessPackageName 'research'
     [System.IO.Directory]::CreateDirectory((Join-Path $overrides.Claude $foreignName)) | Out-Null

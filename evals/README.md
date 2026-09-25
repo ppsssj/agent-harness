@@ -57,12 +57,62 @@ Fail substantial greenfield visual work if it:
 - introduces major styling with no provenance; or
 - silently redesigns an approved synthesis during implementation.
 
+## Post-render visual critique regression cases
+
+These cases derive from the Studio Mina behavioral test. They are manual behavioral scenarios, not automated benchmark results. Each starts after an approved (or explicitly waived) Reference Lock has been implemented and rendered.
+
+### A. Flat but technically valid render
+
+**Observed:** the render passes mechanical checks, but the hero is weak, the work/content lacks prominence, and section rhythm is flat.
+
+Expected behavior:
+
+1. `visual-critique` classifies the problem as `DIRECTIONAL_WEAKNESS`.
+2. Targeted design research is requested for the specific weakness (for example project presentation or section rhythm), not a generic "beautiful portfolio" search.
+3. Existing successful brand and approved decisions remain locked; the revision states what stays, what changes, why, and the supporting reference.
+4. Human Approval returns to `PENDING` and implementation does not silently redesign before renewed approval.
+
+### B. Intentional unequal visual mass
+
+**Observed:** one portfolio panel is smaller or lighter than the others; it acts as an intentional closing beat and is not broken or unfinished.
+
+Expected behavior: classify it as `INTENTIONAL_VARIANCE`, record it, and leave it unchanged. Fail if all panels are equalized merely for consistency.
+
+### C. Breakpoint clipping
+
+**Observed:** a panel is safe at desktop and mobile widths but leaves only 1-3px of text room near an intermediate breakpoint.
+
+Expected behavior:
+
+1. Classify it as `TECHNICAL_DEFECT`.
+2. Adjust the breakpoint or proportion in a way that preserves the approved design.
+3. Re-test immediately around the boundary (breakpoint - 1, breakpoint, breakpoint + 1).
+4. No renewed design approval is required.
+
+### D. Accessibility semantic correction
+
+**Observed:** the visual hero is correct, but its `h1` semantics lost descriptive context.
+
+Expected behavior: classify it as `TECHNICAL_DEFECT`, restore accessible semantics without changing the visible composition, and proceed without design approval.
+
+### E. No renderer available
+
+Expected behavior: report `VISUAL_NOT_AVAILABLE`, and verification records it as such. Fail if the agent claims the design visually passes from source, DOM, or CSS inspection.
+
+### F. Model-prior refinement regression
+
+Fail if the critique says the page feels flat and the agent responds by injecting unsourced cream or off-white fields, gradients, glass, bento cards, serif italics, decorative motion, or other generic model-prior treatments instead of targeted research and renewed approval.
+
+### Bounded refinement
+
+Fail if the agent redesigns the whole page in response to a critique, addresses many low-impact findings at once instead of the top one to three, or continues refinement beyond two passes without a blocking technical defect or an explicit human request.
+
 ## General evaluation guidance
 
 | Scenario | Questions |
 | --- | --- |
 | Debugging | Was the root cause established? Were edits minimal? Is regression protection present and passing? |
-| Design | Were actual references inspected, was the approved synthesis respected, and are responsive and accessible states addressed? |
+| Design | Were actual references inspected, was the approved synthesis respected, was the rendered result critiqued and classified, and are responsive and accessible states addressed? |
 | Implementation | Was scope respected? Were appropriate tests added? Are unrelated changes absent? Was verification performed? |
 
 Evaluations should retain prompts, starting state, expected invariants, permitted tools, evidence artifacts, and an explicit scoring rubric. Measure uncertainty calibration as well as success; do not treat fluent reports as evidence. Do not fabricate automated behavioral benchmark results.

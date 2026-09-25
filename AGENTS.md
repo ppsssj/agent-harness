@@ -32,6 +32,8 @@ Do not claim a change is fixed, complete, passing, production-ready, or secure w
 
 ## Skill discovery
 
-Read the relevant skill before applying it. Use [research](skills/research/SKILL.md) for evidence questions, [design-research](skills/design-research/SKILL.md) before significant greenfield visual work, [frontend-design](skills/frontend-design/SKILL.md) for UI implementation, [root-cause](skills/root-cause/SKILL.md) for bugs, [architecture](skills/architecture/SKILL.md) for material decisions, [implementation](skills/implementation/SKILL.md) for scoped changes, [verification](skills/verification/SKILL.md) before completion, and [pr](skills/pr/SKILL.md) for review preparation.
+Read the relevant skill before applying it. Use [research](skills/research/SKILL.md) for evidence questions, [design-research](skills/design-research/SKILL.md) before significant greenfield visual work, [frontend-design](skills/frontend-design/SKILL.md) for UI implementation, [visual-critique](skills/visual-critique/SKILL.md) to review the rendered result of significant visual work, [root-cause](skills/root-cause/SKILL.md) for bugs, [architecture](skills/architecture/SKILL.md) for material decisions, [implementation](skills/implementation/SKILL.md) for scoped changes, [verification](skills/verification/SKILL.md) before completion, and [pr](skills/pr/SKILL.md) for review preparation.
+
+Significant visual work follows `design-research -> frontend-design -> visual-critique -> verification -> pr`. Visual critique may loop back through bounded refinement or, for a directional weakness, targeted design research with renewed approval.
 
 Existing repository instructions and conventions are constraints; surface conflicts with this contract rather than silently ignoring either one.
