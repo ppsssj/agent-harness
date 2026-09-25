@@ -7,15 +7,43 @@ Audience:
 Surface:
 Primary task:
 
-## Identity
+## Project Identity Constraints
 
-Describe the intended character (for example, technical, experimental, editorial).
+Existing brand:
+Existing design system:
+Product, accessibility, responsive, and performance constraints:
 
-## Reference Lock
+## Approved References
 
-Link to or summarize [reference-lock.md](reference-lock.md): primary, typography, interaction, and product-pattern references. For each, state the source, concept borrowed, and what must not be copied.
+Link to or summarize [reference-lock.md](reference-lock.md). List each inspected source with its URL, discovery source, and the observations that informed this work.
 
-## Design Dials
+## Preserve / Adapt / Invent Decisions
+
+Summarize the approved element map. Preserve strong reference decisions unless a concrete project constraint requires adaptation; record that reason. Include inventions only when they solve a documented product need.
+
+## Final Synthesis
+
+State the approved combination of reference elements, project identity, and any product-specific invention. This is the implementation direction; do not silently replace it with a new aesthetic direction.
+
+## Major Visual Decision Map
+
+Copy the approved pre-implementation map from [reference-lock.md](reference-lock.md). Include only decisions that materially shape the visual direction.
+
+| Major decision | Proposed treatment | Provenance | Decision |
+| --- | --- | --- | --- |
+| Background / tonal treatment |  |  |  |
+| Typography character |  |  |  |
+| Hero composition |  |  |  |
+| Project/content presentation |  |  |  |
+| Accent role |  |  |  |
+| Section composition or contrast |  |  |  |
+| Metadata, motion, or recurring motif |  |  |  |
+
+Use only: reference, existing brand / design system, product requirement, or accessibility / technical constraint. Evidence must support the treatment at the proposed level of specificity. The map governs major visual decisions, not literal CSS values: exact hexes, fonts, sizes, line-heights, and tracking may be calibrated during implementation. Do not create or backfill this map after implementation as evidence of prior design reasoning.
+
+## Optional Design Dials
+
+Use only where the approved Reference Lock does not already determine the choice.
 
 | Dial | Value | Controls |
 | --- | --- | --- |
@@ -75,4 +103,4 @@ Focus states:
 
 ## Avoid
 
-Require explicit justification for arbitrary gradients, excessive glassmorphism or rounded cards, unnecessary bento grids, decorative floating blobs, gratuitous animation, weak hierarchy, and generic SaaS hero composition. These patterns are not prohibited; they must serve the direction and task.
+Avoid major aesthetic decisions with no provenance. Common patterns--gradients, glass cards, rounded cards, bento layouts, floating blobs, generic SaaS heroes, serif-italic accents, or novelty motion--are appropriate only when supported by the approved synthesis or a concrete project constraint.

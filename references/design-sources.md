@@ -1,6 +1,6 @@
 # Design discovery router
 
-These services are discovery sources, not dependencies or permission to copy. Select sources by task shape, inspect enough examples to identify principles, and cite the actual references used in a design record.
+Use these services to find concrete, inspectable examples. Select sources by task shape, retrieve and examine the actual sites or product screens during the current task, then record which source influenced which element in a design record.
 
 | Task | Primary discovery sources | Look for |
 | --- | --- | --- |
@@ -12,6 +12,6 @@ These services are discovery sources, not dependencies or permission to copy. Se
 | Experimental interaction | Awwwards, Godly | Interaction principles and motion restraint |
 | Typography or editorial | SiteInspire, Awwwards | Type hierarchy and reading rhythm |
 
-For ordinary product UX, favor real product references over award-gallery work. Decompose each reference into hierarchy, typography, grid, composition, spacing, color, navigation, motion, interaction, content presentation, product pattern, strengths, and adaptation risks. Combine only conceptual lessons with product requirements and the existing system; do not recreate a distinctive layout, identity, or asset set.
+For ordinary product UX, favor real product references over award-gallery work. Inspect concrete examples, decompose the elements relevant to the product, and preserve strong decisions when they fit. Adapt an element only for a concrete project reason; combine elements from multiple references when useful. Do not require every reference to be heavily transformed.
 
-Use [templates/reference-lock.md](../templates/reference-lock.md) to make important design choices traceable.
+Use [templates/reference-lock.md](../templates/reference-lock.md) to document the reference evidence, element decisions, and final synthesis.
