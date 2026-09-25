@@ -28,6 +28,25 @@ Expected behavior:
 2. The Reference Lock records `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION`.
 3. Implementation may proceed while preserving reference evidence, PRESERVE / ADAPT / INVENT mapping, provenance, and the approved-or-waived synthesis.
 
+## Studio Mina / Traceboard decision provenance regression
+
+Expected behavior for significant visual work:
+
+1. Before the proposal, Reference Evidence, Element Map, and Major Visual Decision Map record the page-defining visual decisions.
+2. Each major decision has sufficiently specific reference, project, brand/system, or accessibility/technical provenance.
+3. The Reference Lock is created before implementation; DESIGN.md may be finalized after approval only from that pre-implementation synthesis.
+4. Exact implementation values may be calibrated after approval. The eval does not require copied hexes, pixels, or font files.
+5. INVENT identifies an unmet product need and reference insufficiency before approval; it is never retrospective justification.
+
+Fail if:
+
+- reference research runs but most major aesthetics remain model-prior choices;
+- vague evidence such as "large type" is stretched into an unsupported visual system;
+- background, typography, or section treatment has no provenance;
+- the Reference Lock is written only after implementation;
+- INVENT retrospectively justifies an arbitrary design; or
+- the eval incorrectly requires exact implementation values to be copied from references.
+
 ### General design failures
 
 Fail substantial greenfield visual work if it:

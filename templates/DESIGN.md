@@ -25,18 +25,21 @@ Summarize the approved element map. Preserve strong reference decisions unless a
 
 State the approved combination of reference elements, project identity, and any product-specific invention. This is the implementation direction; do not silently replace it with a new aesthetic direction.
 
-## Major Visual Decision Provenance
+## Major Visual Decision Map
 
-| Decision | Provenance | Detail / reason |
-| --- | --- | --- |
-| Primary palette | Existing brand / design system |  |
-| Typography treatment | Reference |  |
-| Hero composition | Reference |  |
-| Card system | Reference |  |
-| Radius language | Existing design system |  |
-| Motion pattern | Accessibility / technical constraint |  |
+Copy the approved pre-implementation map from [reference-lock.md](reference-lock.md). Include only decisions that materially shape the visual direction.
 
-Use one of: reference, existing brand / design system, product requirement, or accessibility / technical constraint. Add only decisions that materially shape the visual direction.
+| Major decision | Proposed treatment | Provenance | Decision |
+| --- | --- | --- | --- |
+| Background / tonal treatment |  |  |  |
+| Typography character |  |  |  |
+| Hero composition |  |  |  |
+| Project/content presentation |  |  |  |
+| Accent role |  |  |  |
+| Section composition or contrast |  |  |  |
+| Metadata, motion, or recurring motif |  |  |  |
+
+Use only: reference, existing brand / design system, product requirement, or accessibility / technical constraint. Evidence must support the treatment at the proposed level of specificity. The map governs major visual decisions, not literal CSS values: exact hexes, fonts, sizes, line-heights, and tracking may be calibrated during implementation. Do not create or backfill this map after implementation as evidence of prior design reasoning.
 
 ## Optional Design Dials
 

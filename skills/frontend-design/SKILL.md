@@ -21,7 +21,7 @@ Requirements, frontend architecture, design system, relevant [DESIGN.md](../../t
 
 1. Inspect components, tokens, routing, responsiveness, and existing patterns.
 2. Decide if design research is needed; normally run it for greenfield visual work.
-3. For significant unsettled visual work, inspect the Design Synthesis Proposal and Reference Lock status before implementation. Implement only when the recorded status is exactly `APPROVED` or `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION`. If the status is `PENDING` or missing, stop and request or await approval; do not edit implementation files or begin visual implementation.
+3. For significant unsettled visual work, inspect the Design Synthesis Proposal and Reference Lock before implementation. Implement only when the recorded status is exactly `APPROVED` or `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION`, the material direction has a PRESERVE / ADAPT / INVENT map, and every Major Visual Decision has recorded valid provenance. If any are `PENDING`, missing, unresolved, or unsupported, stop and return to design-research; do not edit implementation files or begin visual implementation.
 4. Preserve the established system or implement the approved direction without inventing a parallel design system. PRESERVE elements should remain recognizably faithful to the approved reference decision; ADAPT elements must reflect their recorded reason; INVENT elements must satisfy their documented product need. Do not silently redesign that direction after its human checkpoint.
 5. Verify render, responsive states, keyboard/focus behavior, accessibility, performance sanity, and visual consistency.
 
