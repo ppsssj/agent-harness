@@ -6,16 +6,12 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  windows-powershell:
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shell: [powershell, pwsh]
     steps:
       - uses: actions/checkout@v4
       - name: Parse PowerShell
-        shell: ${{ matrix.shell }}
+        shell: powershell
         run: |
           $files = Get-ChildItem scripts,tests -Recurse -File -Filter *.ps1
           foreach ($file in $files) {
@@ -24,8 +20,27 @@ jobs:
             if ($errors.Count) { throw "$($file.FullName): $($errors[0].Message)" }
           }
       - name: Installer tests
-        shell: ${{ matrix.shell }}
+        shell: powershell
         run: ./tests/installer-tests.ps1
       - name: Diff hygiene
-        shell: ${{ matrix.shell }}
+        shell: powershell
+        run: git diff --check
+  windows-pwsh:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem scripts,tests -Recurse -File -Filter *.ps1
+          foreach ($file in $files) {
+            $tokens = $null; $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) { throw "$($file.FullName): $($errors[0].Message)" }
+          }
+      - name: Installer tests
+        shell: pwsh
+        run: ./tests/installer-tests.ps1
+      - name: Diff hygiene
+        shell: pwsh
         run: git diff --check
