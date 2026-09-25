@@ -1,6 +1,6 @@
 # Sources and adaptations
 
-This document records material public research used in v0.1. The repository adapts high-level concepts only; its text and workflow wording were written independently.
+This document records material public research used in v0.1 and v0.2. The repository adapts high-level concepts only; its text and workflow wording were written independently.
 
 | Project / source | URL | Concept studied | Adaptation in agent-harness | License considerations |
 | --- | --- | --- | --- | --- |
@@ -21,3 +21,19 @@ This document records material public research used in v0.1. The repository adap
 | SaaSFrame | https://www.saasframe.io/ | SaaS UI discovery | Router source for dashboard and settings patterns | Discovery only; do not copy designs or assets |
 
 The four code-skill repositories were inspected in September 2026. Design discovery services are listed because they inform routing policy, not because a particular design from them was studied for this bootstrap.
+
+## v0.2 official host research
+
+All sources below were accessed on 2026-09-25. They inform [V0.2_INSTALLATION_DESIGN.md](V0.2_INSTALLATION_DESIGN.md); no host-specific configuration or implementation was copied.
+
+| Source | URL | Concept studied | Design adaptation |
+| --- | --- | --- | --- |
+| OpenAI: Custom instructions with AGENTS.md | https://learn.chatgpt.com/docs/agent-configuration/agents-md | Codex global/project instruction discovery and session refresh | Keep project instructions local; do not install a global harness instruction adapter |
+| OpenAI: Build skills | https://learn.chatgpt.com/docs/build-skills | Codex user/project skill locations, metadata discovery, symlink support | Generate self-contained, namespaced user-skill artifacts with concise metadata |
+| OpenAI: Package your plugin | https://developers.openai.com/plugins/build/plugins | Plugin packaging and marketplace distribution | Defer plugin packaging until direct installation and cross-host behavior are validated |
+| OpenAI: Windows sandbox | https://learn.chatgpt.com/docs/windows/windows-sandbox | Native Windows Codex support | Treat native Windows and WSL as separate installation environments |
+| Anthropic: Explore the .claude directory | https://code.claude.com/docs/en/claude-directory | Claude global/project directory scopes and Windows home mapping | Use only user-scope skills; preserve host/project configuration |
+| Anthropic: Extend Claude with skills | https://code.claude.com/docs/en/skills | Personal/project skill locations, self-contained support files, automatic relevance loading, symlink support | Use direct self-contained personal-skill copies; validate behavior in fresh sessions |
+| Anthropic: How Claude remembers your project | https://code.claude.com/docs/en/memory | CLAUDE.md/AGENTS.md loading and precedence | Keep project instruction ownership separate from global harness skills |
+| Anthropic: Plugins overview | https://code.claude.com/docs/en/plugins | Plugin scopes, marketplaces, and privilege implications | Defer plugin distribution and include it in a separate trust review |
+| Anthropic: Set up Claude Code | https://docs.anthropic.com/en/docs/claude-code/getting-started | Windows host modes and restart/update behavior | Require host/environment detection and a new session after updates |
