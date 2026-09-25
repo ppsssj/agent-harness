@@ -233,8 +233,8 @@ function Get-AgentHarnessSourceManifest {
     $match = [regex]::Match($content, '(?s)\A---\r?\n(.*?)\r?\n---\r?\n')
     if (-not $match.Success) { throw "Invalid frontmatter in $path" }
     $frontmatter = $match.Groups[1].Value
-    $nameMatch = [regex]::Match($frontmatter, '(?m)^name:\s*([^\r\n]+)\s*$')
-    $descriptionMatch = [regex]::Match($frontmatter, '(?m)^description:\s*(.+)\s*$')
+    $nameMatch = [regex]::Match($frontmatter, '(?m)^name:[ \t]*([^\r\n]+?)[ \t]*\r?$')
+    $descriptionMatch = [regex]::Match($frontmatter, '(?m)^description:[ \t]*(.+?)[ \t]*\r?$')
     if (-not $nameMatch.Success -or $nameMatch.Groups[1].Value.Trim() -ne $SkillName) { throw "Unexpected frontmatter name in $path" }
     if (-not $descriptionMatch.Success -or [string]::IsNullOrWhiteSpace($descriptionMatch.Groups[1].Value)) { throw "Missing frontmatter description in $path" }
     return [pscustomobject]@{ Path = $path; Content = $content; FrontmatterMatch = $match; Description = $descriptionMatch.Groups[1].Value.Trim() }
@@ -371,8 +371,8 @@ function Test-AgentHarnessPackageRoot {
     $content = Get-Content -LiteralPath $manifestPath -Raw
     $frontmatter = [regex]::Match($content, '(?s)\A---\r?\n(.*?)\r?\n---\r?\n')
     if (-not $frontmatter.Success) { throw "Invalid package frontmatter: $manifestPath" }
-    $name = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^name:\s*([^\r\n]+)\s*$')
-    $description = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^description:\s*(.+)\s*$')
+    $name = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^name:[ \t]*([^\r\n]+?)[ \t]*\r?$')
+    $description = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^description:[ \t]*(.+?)[ \t]*\r?$')
     $expectedNames = @($script:ExpectedSkills | ForEach-Object { Get-AgentHarnessPackageName -SourceSkillName $_ })
     if (-not $name.Success -or $name.Groups[1].Value.Trim() -notin $expectedNames) { throw "Invalid package name in $manifestPath" }
     if (-not $description.Success -or [string]::IsNullOrWhiteSpace($description.Groups[1].Value)) { throw "Missing package description in $manifestPath" }
