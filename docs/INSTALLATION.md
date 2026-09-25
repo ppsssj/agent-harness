@@ -36,7 +36,7 @@ Update the repository through your normal reviewed Git workflow, then preview an
 
 `-AllowDirtySource` and `-AllowNonGitSource` are explicit exceptions for a reviewed snapshot. Their state record captures provenance, Git status when available, and installed content hashes. They should not be used for ordinary updates.
 
-An existing package is replaced only if agent-harness state proves ownership and every recorded hash still matches. A same-named foreign package, a modified package, a stale state entry, a path escape, or a reparse point is a safe refusal, not an overwrite.
+An existing package is replaced only if agent-harness state proves ownership and every recorded hash still matches. Installation stages verified packages, moves prior owned packages to a same-parent rollback directory, switches the package directories, commits and revalidates state, and only then deletes rollback material. If state commit fails, new packages are removed and prior packages are restored. An incomplete rollback preserves its recovery directory and reports `BROKEN`. A same-named foreign package, a modified package, a stale state entry, a path escape, or a reparse point is a safe refusal, not an overwrite.
 
 ## Doctor
 
@@ -63,8 +63,8 @@ Then apply it:
 .\scripts\uninstall.ps1 -Target Both -Apply
 ```
 
-Uninstall reads `%USERPROFILE%\.agent-harness\install-state.json` (outside host directories), recomputes all hashes, and deletes only unmodified owned package directories. Modified, foreign, missing, or unsafe paths are preserved for manual cleanup. It never deletes a whole host skill directory. The state file is removed only after its final managed target is successfully removed.
+Uninstall reads `%USERPROFILE%\.agent-harness\install-state.json` (outside host directories), recomputes all hashes, and moves only unmodified owned package directories to quarantine. It commits the reduced state before deleting that quarantine; if state commit fails, it restores every package. Modified, foreign, missing, or unsafe paths are preserved for manual cleanup. It never deletes a whole host skill directory. The state file is removed only after its final managed target is successfully removed.
 
 ## Windows and Unicode
 
-The scripts use literal paths, .NET path APIs, and UTF-8 JSON to support spaces and Unicode profile paths. They reject managed destination reparse points and do not bridge Windows and WSL automatically.
+The scripts use literal paths, .NET path APIs, and UTF-8 JSON to support spaces and Unicode profile paths. Before inventory, validation, copy, move, or removal, they inspect the managed package tree itself (the package root and every nested child) and reject any reparse point without traversing it. They likewise reject a reparse point at the resolved skill root, state directory, or state file. Unrelated ancestors such as the user profile are outside that inspection boundary. The scripts do not bridge Windows and WSL automatically.

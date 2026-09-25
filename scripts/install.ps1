@@ -4,6 +4,7 @@ param(
     [switch]$Apply,
     [switch]$AllowDirtySource,
     [switch]$AllowNonGitSource,
+    [switch]$TestInjectStateWriteFailure,
     [string]$SourceRoot = (Split-Path -Parent $PSScriptRoot),
     [string]$StatePath,
     [hashtable]$TargetRootOverrides
@@ -122,6 +123,7 @@ function Install-OneTarget {
             host = $TargetHost; destinationRoot = $target; installedAt = [DateTime]::UtcNow.ToString('o')
             packageFormatVersion = 1; packages = $packages
             source = [pscustomobject]@{ path = $Trust.Path; gitCommit = $Trust.GitCommit; provenance = $Trust.Provenance; gitStatus = @($Trust.GitStatus); artifactInventory = @($Trust.ArtifactInventory) }
+            transaction = [pscustomobject]@{ target = $target; stage = $stage; backup = $backup; movedOld = @($movedOld); movedNew = @($movedNew) }
         }
     } catch {
         foreach ($name in $movedNew) {
@@ -135,8 +137,29 @@ function Install-OneTarget {
         throw
     } finally {
         if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
-        if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Recurse -Force }
     }
+}
+
+function Undo-InstallTransaction {
+    param($Record)
+    $transaction = $Record.transaction
+    $failures = @()
+    foreach ($name in $transaction.movedNew) {
+        $newPath = Join-Path $transaction.target $name
+        if (Test-Path -LiteralPath $newPath) { try { Remove-Item -LiteralPath $newPath -Recurse -Force } catch { $failures += $_.Exception.Message } }
+    }
+    foreach ($name in $transaction.movedOld) {
+        $oldPath = Join-Path $transaction.backup $name
+        if (Test-Path -LiteralPath $oldPath) { try { Move-Item -LiteralPath $oldPath -Destination $transaction.target } catch { $failures += $_.Exception.Message } }
+    }
+    if ($failures.Count -gt 0) { return "BROKEN: rollback incomplete; recovery material preserved at $($transaction.backup). $($failures -join ' | ')" }
+    if (Test-Path -LiteralPath $transaction.backup) { Remove-Item -LiteralPath $transaction.backup -Recurse -Force }
+    return $null
+}
+
+function Finalize-InstallTransaction {
+    param($Record)
+    if (Test-Path -LiteralPath $Record.transaction.backup) { Remove-Item -LiteralPath $Record.transaction.backup -Recurse -Force }
 }
 
 if ([string]::IsNullOrWhiteSpace($StatePath)) { $StatePath = Get-AgentHarnessDefaultStatePath }
@@ -181,7 +204,17 @@ try {
                 source = [pscustomobject]@{ path = $trust.Path; gitCommit = $trust.GitCommit; provenance = $trust.Provenance; gitStatus = @($trust.GitStatus); artifactInventory = @($trust.ArtifactInventory) }
                 managedTargets = @($retained + @($successful | ForEach-Object { $_.record }))
             }
-            Write-AgentHarnessState -State $newState -StatePath $StatePath
+            try {
+                Write-AgentHarnessState -State $newState -StatePath $StatePath -TestInjectFailure:$TestInjectStateWriteFailure
+                foreach ($result in $successful) { Finalize-InstallTransaction -Record $result.record }
+            } catch {
+                $stateFailure = $_.Exception.Message
+                foreach ($result in $successful) {
+                    $rollback = Undo-InstallTransaction -Record $result.record
+                    $result.status = if ($null -eq $rollback) { 'FAILED' } else { 'BROKEN' }
+                    $result.message = if ($null -eq $rollback) { "State commit failed; filesystem restored. $stateFailure" } else { "$stateFailure $rollback" }
+                }
+            }
         }
     }
     [pscustomobject]@{ source = $trust; statePath = $StatePath; apply = [bool]$Apply; results = $results }

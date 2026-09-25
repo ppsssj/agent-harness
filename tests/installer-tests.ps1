@@ -116,6 +116,38 @@ try {
     $stale = & $uninstaller -Target Claude -Apply -StatePath $missingState -TargetRootOverrides $overrides
     Assert-Test ($stale.results[0].status -eq 'NOT_MANAGED') 'missing state is non-destructive'
 
+    $transactionRoot = Join-Path $root 'transaction tests'
+    [System.IO.Directory]::CreateDirectory($transactionRoot) | Out-Null
+    $transactionSource = New-FixtureSource -Root $transactionRoot
+    $transactionState = Join-Path $transactionRoot 'state/install-state.json'
+    $transactionTargets = @{ Codex = (Join-Path $transactionRoot 'Codex skills'); Claude = (Join-Path $transactionRoot 'Claude skills') }
+    $firstFailure = & $installer -Target Codex -Apply -TestInjectStateWriteFailure -SourceRoot $transactionSource -StatePath $transactionState -TargetRootOverrides $transactionTargets
+    Assert-Test ($firstFailure.results[0].status -eq 'FAILED' -and -not (Test-Path -LiteralPath (Join-Path $transactionTargets.Codex 'agent-harness-research')) -and -not (Test-Path -LiteralPath $transactionState)) 'first install state failure restores filesystem and leaves no state'
+
+    & $installer -Target Codex -Apply -SourceRoot $transactionSource -StatePath $transactionState -TargetRootOverrides $transactionTargets | Out-Null
+    $oldState = Read-AgentHarnessState -StatePath $transactionState
+    $oldResearch = @($oldState.managedTargets[0].packages | Where-Object { $_.name -eq 'agent-harness-research' })[0].files
+    Add-Content -LiteralPath (Join-Path $transactionSource 'skills/research/SKILL.md') -Value "`nUpdated fixture text."
+    & git -C $transactionSource add skills/research/SKILL.md
+    & git -C $transactionSource -c user.name='agent-harness tests' -c user.email='tests@example.invalid' commit -qm update
+    $updateFailure = & $installer -Target Codex -Apply -TestInjectStateWriteFailure -SourceRoot $transactionSource -StatePath $transactionState -TargetRootOverrides $transactionTargets
+    $restored = Test-AgentHarnessInventory -Root (Join-Path $transactionTargets.Codex 'agent-harness-research') -ExpectedInventory $oldResearch
+    Assert-Test ($updateFailure.results[0].status -eq 'FAILED' -and $restored.Valid -and @((Read-AgentHarnessState -StatePath $transactionState).managedTargets).Count -eq 1) 'update state failure restores old packages and old state'
+
+    $uninstallFailure = & $uninstaller -Target Codex -Apply -TestInjectStateWriteFailure -StatePath $transactionState -TargetRootOverrides $transactionTargets
+    $uninstallRestored = Test-AgentHarnessInventory -Root (Join-Path $transactionTargets.Codex 'agent-harness-research') -ExpectedInventory $oldResearch
+    Assert-Test ($uninstallFailure.results[0].status -eq 'FAILED' -and $uninstallRestored.Valid -and @((Read-AgentHarnessState -StatePath $transactionState).managedTargets).Count -eq 1) 'uninstall state failure restores packages and old state'
+
+    $closureSource = New-FixtureSource -Root (Join-Path $root 'closure tests')
+    Add-Content -LiteralPath (Join-Path $closureSource 'references/engineering-sources.md') -Value "`n[verification template](../templates/verification-report.md)"
+    $closureOutput = Join-Path $root 'closure packages'
+    New-AgentHarnessPackages -SourceRoot $closureSource -OutputRoot $closureOutput | Out-Null
+    Assert-Test (Test-Path -LiteralPath (Join-Path $closureOutput 'agent-harness-research/templates/verification-report.md')) 'transitive support dependency is copied package-locally'
+    Add-Content -LiteralPath (Join-Path $closureSource 'references/engineering-sources.md') -Value "`n[missing](../templates/missing.md)"
+    $closureFailure = $null
+    try { New-AgentHarnessPackages -SourceRoot $closureSource -OutputRoot (Join-Path $root 'closure failure') | Out-Null } catch { $closureFailure = $_.Exception.Message }
+    Assert-Test ($closureFailure -match 'Unsupported support dependency|does not exist') 'missing transitive support dependency fails packaging'
+
     try {
         $link = Join-Path $root 'reparse-test'
         New-Item -ItemType SymbolicLink -Path $link -Target $source -ErrorAction Stop | Out-Null

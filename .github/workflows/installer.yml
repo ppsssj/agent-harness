@@ -1,0 +1,31 @@
+name: Installer
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell
+        shell: ${{ matrix.shell }}
+        run: |
+          $files = Get-ChildItem scripts,tests -Recurse -File -Filter *.ps1
+          foreach ($file in $files) {
+            $tokens = $null; $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) { throw "$($file.FullName): $($errors[0].Message)" }
+          }
+      - name: Installer tests
+        shell: ${{ matrix.shell }}
+        run: ./tests/installer-tests.ps1
+      - name: Diff hygiene
+        shell: ${{ matrix.shell }}
+        run: git diff --check

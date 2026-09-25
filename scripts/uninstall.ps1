@@ -2,6 +2,7 @@
 param(
     [ValidateSet('Codex', 'Claude', 'Both')][string]$Target = 'Both',
     [switch]$Apply,
+    [switch]$TestInjectStateWriteFailure,
     [string]$StatePath,
     [hashtable]$TargetRootOverrides
 )
@@ -23,6 +24,7 @@ if ($null -eq $state) {
 
 $results = @()
 $removedHosts = @()
+$transactions = @()
 foreach ($targetHost in $selected) {
     $records = @(Get-StateTarget -State $state -TargetHost $targetHost)
     if ($records.Count -eq 0) { $results += [pscustomobject]@{ host = $targetHost; status = 'NOT_MANAGED'; message = 'No managed target entry.' }; continue }
@@ -40,9 +42,18 @@ foreach ($targetHost in $selected) {
             if (-not $inventory.Valid) { throw "Owned package '$($package.name)' was modified; preserving it. $($inventory.Reason)" }
         }
         if ($Apply) {
-            foreach ($package in $record.packages) { Remove-Item -LiteralPath (Join-Path $resolvedRoot $package.name) -Recurse -Force }
+            $quarantine = Join-Path (Split-Path -Parent $resolvedRoot) ('.agent-harness-uninstall-' + [guid]::NewGuid().ToString('N'))
+            [System.IO.Directory]::CreateDirectory($quarantine) | Out-Null
+            $moved = @()
+            try {
+                foreach ($package in $record.packages) { Move-Item -LiteralPath (Join-Path $resolvedRoot $package.name) -Destination $quarantine; $moved += $package.name }
+            } catch {
+                foreach ($name in $moved) { $saved = Join-Path $quarantine $name; if (Test-Path -LiteralPath $saved) { Move-Item -LiteralPath $saved -Destination $resolvedRoot } }
+                throw
+            }
+            $transactions += [pscustomobject]@{ host = $targetHost; root = $resolvedRoot; quarantine = $quarantine; moved = @($moved) }
             $removedHosts += $targetHost
-            $results += [pscustomobject]@{ host = $targetHost; status = 'REMOVED'; message = 'Removed only hash-verified owned packages.' }
+            $results += [pscustomobject]@{ host = $targetHost; status = 'PENDING_STATE_COMMIT'; message = 'Packages quarantined pending state commit.' }
         } else {
             $results += [pscustomobject]@{ host = $targetHost; status = 'PREVIEW'; message = 'All owned packages verify; no files were removed.' }
         }
@@ -51,11 +62,24 @@ foreach ($targetHost in $selected) {
 
 if ($Apply -and $removedHosts.Count -gt 0) {
     $remaining = @($state.managedTargets | Where-Object { $_.host -notin $removedHosts })
-    if ($remaining.Count -eq 0) {
-        Remove-Item -LiteralPath $StatePath -Force
-    } else {
-        $newState = [pscustomobject]@{ schemaVersion = 1; updatedAt = [DateTime]::UtcNow.ToString('o'); source = $state.source; managedTargets = $remaining }
-        Write-AgentHarnessState -State $newState -StatePath $StatePath
+    $newState = [pscustomobject]@{ schemaVersion = 1; updatedAt = [DateTime]::UtcNow.ToString('o'); source = $state.source; managedTargets = $remaining }
+    try {
+        Write-AgentHarnessState -State $newState -StatePath $StatePath -TestInjectFailure:$TestInjectStateWriteFailure
+        foreach ($transaction in $transactions) {
+            Remove-Item -LiteralPath $transaction.quarantine -Recurse -Force
+            ($results | Where-Object { $_.host -eq $transaction.host }).status = 'REMOVED'
+            ($results | Where-Object { $_.host -eq $transaction.host }).message = 'Removed only hash-verified owned packages after state commit.'
+        }
+        if ($remaining.Count -eq 0) { Remove-Item -LiteralPath $StatePath -Force }
+    } catch {
+        $stateFailure = $_.Exception.Message
+        foreach ($transaction in $transactions) {
+            $failures = @()
+            foreach ($name in $transaction.moved) { $saved = Join-Path $transaction.quarantine $name; if (Test-Path -LiteralPath $saved) { try { Move-Item -LiteralPath $saved -Destination $transaction.root } catch { $failures += $_.Exception.Message } } }
+            $result = $results | Where-Object { $_.host -eq $transaction.host }
+            if ($failures.Count -gt 0) { $result.status = 'BROKEN'; $result.message = "State commit failed; rollback incomplete. Recovery material: $($transaction.quarantine). $($failures -join ' | ')" }
+            else { if (Test-Path -LiteralPath $transaction.quarantine) { Remove-Item -LiteralPath $transaction.quarantine -Recurse -Force }; $result.status = 'FAILED'; $result.message = "State commit failed; packages restored. $stateFailure" }
+        }
     }
 }
 [pscustomobject]@{ apply = [bool]$Apply; statePath = $StatePath; results = $results }
