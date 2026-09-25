@@ -373,7 +373,7 @@ function Test-AgentHarnessPackageRoot {
     if (-not $frontmatter.Success) { throw "Invalid package frontmatter: $manifestPath" }
     $name = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^name:\s*([^\r\n]+)\s*$')
     $description = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^description:\s*(.+)\s*$')
-    $expectedName = Split-Path -Leaf $root
+    $expectedName = (New-Object System.IO.DirectoryInfo($root)).Name
     if (-not $name.Success -or $name.Groups[1].Value.Trim() -ne $expectedName -or $expectedName -notmatch '^agent-harness-') { throw "Invalid package name in $manifestPath" }
     if (-not $description.Success -or [string]::IsNullOrWhiteSpace($description.Groups[1].Value)) { throw "Missing package description in $manifestPath" }
 
