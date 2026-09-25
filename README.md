@@ -53,6 +53,10 @@ The repository specifies behavior, evidence, and artifacts, not proprietary comm
 
 The next milestone is making the harness straightforward to adopt: a Windows-first installer, Codex/Claude adapters or supported global skill integration, and a `doctor` command to verify installation. These are not implemented in v0.1.
 
+## Installation
+
+v0.2 provides a Windows-first, ownership-aware installer for self-contained namespaced Codex and Claude Code skills. Start with a preview; applying changes is explicit. See [Installation](docs/INSTALLATION.md).
+
 ## Later roadmap
 
 Potential later areas include security, accessibility, performance, database, deployment, production smoke-testing, incident analysis, an eval runner, and skill quality measurement. They are not implemented here.
