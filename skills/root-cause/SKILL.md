@@ -27,7 +27,7 @@ Precise symptom, expected behavior, affected environment/version, reproduction i
 
 ## Stop conditions
 
-Stop before patching if root cause is not established. If reproduction is impossible, record the limitation and only report evidence-supported hypotheses.
+Stop before patching if root cause is not established. In an emergency, mitigation may precede full root-cause proof only when explicitly labeled as mitigation, risk-justified, reversible where possible, and followed by continued diagnosis; it is not a root-cause fix. If reproduction is impossible, record the limitation and only report evidence-supported hypotheses.
 
 ## Output and verification
 

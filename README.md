@@ -49,9 +49,13 @@ Meaningful visual work is reference-driven, not generated from generic model pri
 
 The repository specifies behavior, evidence, and artifacts, not proprietary commands or tool calls. An agent should use the strongest capabilities its host exposes and report unavailable checks honestly. See [AGENTS.md](AGENTS.md) for the contract.
 
-## Roadmap
+## Next milestone: installation and distribution
 
-Possible additions after v0.1 include security, accessibility, performance, database, deployment, production smoke-testing, incident analysis, an eval runner, and skill quality measurement. They are not implemented here.
+The next milestone is making the harness straightforward to adopt: a Windows-first installer, Codex/Claude adapters or supported global skill integration, and a `doctor` command to verify installation. These are not implemented in v0.1.
+
+## Later roadmap
+
+Potential later areas include security, accessibility, performance, database, deployment, production smoke-testing, incident analysis, an eval runner, and skill quality measurement. They are not implemented here.
 
 ## Sources
 

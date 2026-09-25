@@ -2,6 +2,10 @@
 
 This is the canonical contract for agents working in a repository that adopts agent-harness. Adapters may point here; they must not replace it with vendor-specific rules.
 
+## Instruction precedence
+
+This harness is reusable operating guidance; it does not claim authority over an agent host's native or system instruction hierarchy. Project-specific instructions are local constraints. Reconcile applicable instructions where possible; if a conflict cannot be reconciled, surface it instead of silently choosing.
+
 ## Core loop
 
 `UNDERSTAND -> RESEARCH -> EVIDENCE -> DECIDE -> PLAN -> EXECUTE -> VERIFY -> REPORT`

@@ -15,14 +15,15 @@ No change or decision needs validation; do not run ceremonial unrelated checks.
 
 ## Inputs
 
-Changed behavior, project capabilities, risk/invariants, affected surface, and existing check commands.
+Changed behavior, project capabilities, risk/invariants, affected surface, and project-defined verification commands.
 
 ## Workflow
 
-1. Select proportionate gates using [verification rules](../../references/verification-rules.md).
-2. Run focused checks first, then broader relevant gates.
-3. Inspect diff and working tree; include runtime/browser evidence for user-facing behavior where available.
-4. Record every relevant gate in [verification-report.md](../../templates/verification-report.md).
+1. Discover verification commands from the repository first: package scripts, Makefile or task-runner configuration, CI workflows, project docs, and existing agent instructions. Do not invent or hardcode commands the project does not define.
+2. Select proportionate gates using [verification rules](../../references/verification-rules.md).
+3. Run focused checks first, then broader relevant gates.
+4. Inspect diff and working tree; include runtime/browser evidence for user-facing behavior where available.
+5. Record every relevant gate in [verification-report.md](../../templates/verification-report.md).
 
 ## Stop conditions
 
