@@ -15,14 +15,14 @@ The task is non-visual backend work, a pure bug investigation, or a trivial styl
 
 ## Inputs
 
-Requirements, frontend architecture, design system, relevant [DESIGN.md](../../templates/DESIGN.md), and approved design-research synthesis when the visual direction is unsettled.
+Requirements, frontend architecture, design system, relevant [DESIGN.md](../../templates/DESIGN.md), and design-research synthesis plus its Reference Lock Human Approval status when the visual direction is unsettled.
 
 ## Workflow
 
 1. Inspect components, tokens, routing, responsiveness, and existing patterns.
 2. Decide if design research is needed; normally run it for greenfield visual work.
-3. For significant unsettled visual work, consume the approved Design Synthesis Proposal and Reference Lock before implementation. Do not silently redesign that direction after its human checkpoint.
-4. Preserve the established system or implement the approved direction without inventing a parallel design system. PRESERVE elements should remain recognizably faithful to the approved reference decision; ADAPT elements must reflect their recorded reason; INVENT elements must satisfy their documented product need.
+3. For significant unsettled visual work, inspect the Design Synthesis Proposal and Reference Lock status before implementation. Implement only when the recorded status is exactly `APPROVED` or `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION`. If the status is `PENDING` or missing, stop and request or await approval; do not edit implementation files or begin visual implementation.
+4. Preserve the established system or implement the approved direction without inventing a parallel design system. PRESERVE elements should remain recognizably faithful to the approved reference decision; ADAPT elements must reflect their recorded reason; INVENT elements must satisfy their documented product need. Do not silently redesign that direction after its human checkpoint.
 5. Verify render, responsive states, keyboard/focus behavior, accessibility, performance sanity, and visual consistency.
 
 If an implementation constraint requires changing the approved synthesis, stop and surface the conflict. Do not drift toward generic model-prior aesthetics.

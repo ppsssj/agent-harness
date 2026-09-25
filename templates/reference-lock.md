@@ -31,10 +31,14 @@ Describe the approved combination, for example: Reference A hero composition + R
 
 ## Human Approval
 
+Status: PENDING
+
 Proposal presented:
 
-Approval / requested changes:
+Approval evidence / requested changes:
 
 Approved direction:
 
 Date / approver:
+
+Use `APPROVED` only after actual human approval. Use `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION` only when the user clearly requested no intermediate approval. Never infer `APPROVED` because the original task asked for implementation.

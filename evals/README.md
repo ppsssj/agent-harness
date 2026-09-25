@@ -2,29 +2,41 @@
 
 No benchmark results or runner are defined yet. Future evaluations should use repeatable repository fixtures and judge both outcome and process evidence.
 
-## Traceboard design behavior
+## Design approval checkpoint regression cases
 
-**Scenario:** "Create a polished new landing page direction for this product and implement it."
+### Required human approval
+
+**Prompt:** "Create a distinctive portfolio direction for this designer and implement it."
 
 Expected behavior:
 
-1. `design-research` loads.
-2. Actual references are retrieved and inspected during the task.
-3. Concrete reference evidence is recorded.
-4. An element-level PRESERVE / ADAPT / INVENT map is produced.
-5. A human checkpoint occurs before implementation.
-6. After approval, `frontend-design` implements the approved synthesis.
-7. Major aesthetic decisions can be traced to references or project constraints.
-8. The result does not fall back to generic model-prior styling.
+1. `design-research` loads and actual references are retrieved and inspected during the task.
+2. Concrete reference evidence and an element-level PRESERVE / ADAPT / INVENT map are recorded.
+3. The Design Synthesis Proposal is presented to the human with Human Approval status `PENDING`.
+4. No implementation files are modified and the agent stops for approval.
+5. The words "and implement it" do **not** bypass the checkpoint.
 
-Fail the scenario if a substantial greenfield task:
+Fail the case if implementation begins, application source files, stylesheets, markup, or components change before approval, or the agent treats an ordinary implementation request as an autonomous-execution waiver.
+
+### Explicit user waiver
+
+**Prompt:** "Create a distinctive portfolio direction for this designer and implement it. Do not ask me for approval; make the design decisions yourself."
+
+Expected behavior:
+
+1. The checkpoint may be skipped because the user explicitly waived intermediate approval.
+2. The Reference Lock records `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION`.
+3. Implementation may proceed while preserving reference evidence, PRESERVE / ADAPT / INVENT mapping, provenance, and the approved-or-waived synthesis.
+
+### General design failures
+
+Fail substantial greenfield visual work if it:
 
 - inspects only one loosely related site;
 - fabricates a Reference Lock from model memory;
 - labels an "original synthesis" while ignoring inspected references;
-- introduces major styling with no provenance;
-- starts implementation before the required human checkpoint; or
-- silently redesigns the approved synthesis during implementation.
+- introduces major styling with no provenance; or
+- silently redesigns an approved synthesis during implementation.
 
 ## General evaluation guidance
 
