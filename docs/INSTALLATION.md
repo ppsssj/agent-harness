@@ -1,6 +1,6 @@
 # Installation
 
-agent-harness v0.2 installs eight self-contained, namespaced skill packages for native Windows hosts. It copies a verified snapshot; it does not install repository `AGENTS.md` or `CLAUDE.md`, edit host configuration, create links, alter PATH, or change project files.
+agent-harness installs nine self-contained, namespaced skill packages for native Windows hosts. It copies a verified snapshot; it does not install repository `AGENTS.md` or `CLAUDE.md`, edit host configuration, create links, alter PATH, or change project files.
 
 ## Requirements
 
@@ -28,11 +28,11 @@ Select one host with `-Target Codex` or `-Target Claude`.
 
 Codex installs below `%USERPROFILE%\.agents\skills`. Claude installs below `%CLAUDE_CONFIG_DIR%\skills` when `CLAUDE_CONFIG_DIR` is set; otherwise it uses `%USERPROFILE%\.claude\skills`.
 
-The packages are `agent-harness-research`, `agent-harness-design-research`, `agent-harness-frontend-design`, `agent-harness-architecture`, `agent-harness-implementation`, `agent-harness-root-cause`, `agent-harness-verification`, and `agent-harness-pr`.
+The packages are `agent-harness-research`, `agent-harness-design-research`, `agent-harness-frontend-design`, `agent-harness-visual-critique`, `agent-harness-architecture`, `agent-harness-implementation`, `agent-harness-root-cause`, `agent-harness-verification`, and `agent-harness-pr`.
 
 ## Updates and source trust
 
-Update the repository through your normal reviewed Git workflow, then preview and apply again. The installer never pulls, resets, checks out, cleans, or otherwise changes the source repository.
+Update the repository through your normal reviewed Git workflow, then preview and apply again. When an update adds a skill, doctor reports an existing managed install as `MANAGED_DEGRADED` until the update is applied; the installer adds the new package alongside the owned ones. The installer never pulls, resets, checks out, cleans, or otherwise changes the source repository.
 
 `-AllowDirtySource` and `-AllowNonGitSource` are explicit exceptions for a reviewed snapshot. Their state record captures provenance, Git status when available, and installed content hashes. They should not be used for ordinary updates.
 

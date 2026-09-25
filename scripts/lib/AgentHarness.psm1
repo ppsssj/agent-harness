@@ -5,6 +5,7 @@ $script:ExpectedSkills = @(
     'research',
     'design-research',
     'frontend-design',
+    'visual-critique',
     'architecture',
     'implementation',
     'root-cause',

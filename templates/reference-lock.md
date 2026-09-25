@@ -60,4 +60,12 @@ Approved direction:
 
 Date / approver:
 
+## Revisions
+
+Record post-render revisions requested by visual critique for a DIRECTIONAL_WEAKNESS. Each revision returns Human Approval to `PENDING` unless the original user explicitly waived checkpoints.
+
+| Revision | Observed weakness | What stays | What changes | Why | Supporting reference | Approval |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  | PENDING |
+
 Use `APPROVED` only after actual human approval. Use `SKIPPED_BY_EXPLICIT_USER_INSTRUCTION` only when the user clearly requested no intermediate approval. Never infer `APPROVED` because the original task asked for implementation.

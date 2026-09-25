@@ -23,7 +23,8 @@ Changed behavior, project capabilities, risk/invariants, affected surface, and p
 2. Select proportionate gates using [verification rules](../../references/verification-rules.md).
 3. Run focused checks first, then broader relevant gates.
 4. Inspect diff and working tree; include runtime/browser evidence for user-facing behavior where available.
-5. Record every relevant gate in [verification-report.md](../../templates/verification-report.md).
+5. For significant visual work, record the [visual-critique](../visual-critique/SKILL.md) final status as an evidence item alongside the mechanical gates. Do not re-run the critique here or merge it into a gate; report `VISUAL_NOT_AVAILABLE` as such, never as `PASS`.
+6. Record every relevant gate in [verification-report.md](../../templates/verification-report.md).
 
 ## Stop conditions
 
@@ -35,4 +36,4 @@ Report `PASS`, `FAIL`, `NOT AVAILABLE`, or `NOT RUN`, with commands and observat
 
 ## Related
 
-[implementation](../implementation/SKILL.md), [root-cause](../root-cause/SKILL.md), [pr](../pr/SKILL.md)
+[implementation](../implementation/SKILL.md), [root-cause](../root-cause/SKILL.md), [visual-critique](../visual-critique/SKILL.md), [pr](../pr/SKILL.md)
