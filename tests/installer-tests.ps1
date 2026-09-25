@@ -72,7 +72,7 @@ try {
         $package = Join-Path $firstPackages $name
         Assert-Test (Test-AgentHarnessPackageRoot $package) "package validation $name"
         $frontmatter = Get-Content -LiteralPath (Join-Path $package 'SKILL.md') -Raw
-        Assert-Test ($frontmatter -match "(?m)^name: $name$") "namespaced frontmatter $name"
+        Assert-Test ($frontmatter -match "(?m)^name: $name\r?$") "namespaced frontmatter $name"
         Assert-Test ($frontmatter -notmatch '\]\([^)]*SKILL\.md') "no sibling SKILL.md dependency $name"
     }
 
