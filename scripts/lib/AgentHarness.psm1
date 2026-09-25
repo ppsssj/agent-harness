@@ -353,7 +353,8 @@ function ConvertTo-AgentHarnessPackageContent {
     }
 
     $frontmatter = $Manifest.FrontmatterMatch.Value
-    $replacementFrontmatter = [regex]::Replace($frontmatter, '(?m)^name:\s*[^\r\n]+$', "name: $(Get-AgentHarnessPackageName -SourceSkillName $SkillName)")
+    # Match only the name text, never its line terminator: this preserves LF or CRLF.
+    $replacementFrontmatter = [regex]::Replace($frontmatter, '(?m)^name:[^\r\n]+', "name: $(Get-AgentHarnessPackageName -SourceSkillName $SkillName)")
     return $content.Substring(0, $Manifest.FrontmatterMatch.Index) + $replacementFrontmatter + $content.Substring($Manifest.FrontmatterMatch.Index + $Manifest.FrontmatterMatch.Length)
 }
 

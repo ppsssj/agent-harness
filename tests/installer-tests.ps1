@@ -35,6 +35,15 @@ function New-FixtureSource {
     return $source
 }
 
+function Set-FixtureSkillLineEndings {
+    param([string]$Source, [ValidateSet('LF', 'CRLF')][string]$LineEnding)
+    $ending = if ($LineEnding -eq 'CRLF') { "`r`n" } else { "`n" }
+    Get-ChildItem -LiteralPath (Join-Path $Source 'skills') -Recurse -File -Filter SKILL.md | ForEach-Object {
+        $normalized = [regex]::Replace((Get-Content -LiteralPath $_.FullName -Raw), "`r?`n", "`n")
+        [System.IO.File]::WriteAllText($_.FullName, $normalized.Replace("`n", $ending), (New-Object System.Text.UTF8Encoding($false)))
+    }
+}
+
 $korean = ([string][char]0xD14C) + ([string][char]0xC2A4) + ([string][char]0xD2B8)
 $root = Join-Path ([System.IO.Path]::GetTempPath()) ("Agent Harness $korean " + [guid]::NewGuid().ToString('N'))
 try {
@@ -49,6 +58,15 @@ try {
     New-AgentHarnessPackages -SourceRoot $source -OutputRoot $secondPackages | Out-Null
     Assert-Test ((Get-ChildItem -LiteralPath $firstPackages -Directory).Count -eq 8) 'deterministic packaging creates all eight packages'
     Assert-Test (@(Compare-Object (Get-AgentHarnessFileInventory $firstPackages | ForEach-Object { "$($_.path):$($_.sha256)" }) (Get-AgentHarnessFileInventory $secondPackages | ForEach-Object { "$($_.path):$($_.sha256)" })).Count -eq 0) 'deterministic packaging has identical hashes'
+    foreach ($lineEnding in @('LF', 'CRLF')) {
+        $endingSource = New-FixtureSource -Root (Join-Path $root "frontmatter $lineEnding")
+        Set-FixtureSkillLineEndings -Source $endingSource -LineEnding $lineEnding
+        $endingPackages = Join-Path $root "packages $lineEnding"
+        New-AgentHarnessPackages -SourceRoot $endingSource -OutputRoot $endingPackages | Out-Null
+        $generated = Get-Content -LiteralPath (Join-Path $endingPackages 'agent-harness-research/SKILL.md') -Raw
+        Assert-Test ($generated -match '(?m)^name: agent-harness-research\r?$') "namespaced frontmatter rewrite with $lineEnding source"
+        if ($lineEnding -eq 'CRLF') { Assert-Test ($generated.Contains("name: agent-harness-research`r`n")) 'CRLF is preserved in generated frontmatter' }
+    }
     foreach ($skill in (Get-AgentHarnessExpectedSkills)) {
         $name = Get-AgentHarnessPackageName $skill
         $package = Join-Path $firstPackages $name
