@@ -43,7 +43,7 @@ Small, obvious changes may start with implementation after local inspection. Arc
 
 ## Design philosophy
 
-Meaningful visual work is reference-driven, not generated from generic model priors. [design-research](skills/design-research/SKILL.md) routes a task to appropriate discovery sources, decomposes the useful principles of references, and records a traceable Reference Lock. It then synthesizes an original direction under product, system, accessibility, and performance constraints. It never asks agents to copy a site or visual identity.
+Meaningful visual work is reference-led, not generated from generic model priors. [design-research](skills/design-research/SKILL.md) routes a task to appropriate discovery sources, records concrete observations in a traceable Reference Lock, and maps each important element as PRESERVE, ADAPT, or INVENT. It preserves strong reference decisions when they fit, adapts only for concrete project constraints, and independently implements the approved synthesis without copying code, proprietary assets, marks, or large blocks of copy.
 
 ## Harness agnosticism
 
