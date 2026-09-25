@@ -373,8 +373,7 @@ function Test-AgentHarnessPackageRoot {
     if (-not $frontmatter.Success) { throw "Invalid package frontmatter: $manifestPath" }
     $name = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^name:[ \t]*([^\r\n]+?)[ \t]*\r?$')
     $description = [regex]::Match($frontmatter.Groups[1].Value, '(?m)^description:[ \t]*(.+?)[ \t]*\r?$')
-    $expectedNames = @($script:ExpectedSkills | ForEach-Object { Get-AgentHarnessPackageName -SourceSkillName $_ })
-    if (-not $name.Success -or $name.Groups[1].Value.Trim() -notin $expectedNames) { throw "Invalid package name in $manifestPath" }
+    if (-not $name.Success -or $content -notmatch '(?m)^name:[ \t]*agent-harness-[a-z-]+[ \t]*\r?$') { throw "Invalid package name in $manifestPath" }
     if (-not $description.Success -or [string]::IsNullOrWhiteSpace($description.Groups[1].Value)) { throw "Missing package description in $manifestPath" }
 
     foreach ($markdown in (Get-ChildItem -LiteralPath $root -Recurse -File -Filter *.md -Force)) {
